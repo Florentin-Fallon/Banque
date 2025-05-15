@@ -1,7 +1,7 @@
 plugins {
     java
     application
-    id("org.javamodularity.moduleplugin") version "1.8.12"
+    id("org.javamodularity.moduleplugin") version "1.8.13"
     id("org.openjfx.javafxplugin") version "0.0.13"
     id("org.beryx.jlink") version "3.0.1"
 }
@@ -46,21 +46,15 @@ tasks.withType<Test> {
 }
 
 jlink {
-    // ✅ Corrige le chemin relatif (ne commence pas par un slash !)
-    imageZip.set(layout.buildDirectory.file("distributions/app-${javafx.platform.classifier}.zip"))
-
-    options.set(listOf("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages"))
+    options = listOf("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages")
 
     launcher {
-        name = "Hello"
+        name = "MonApp"
     }
 
     jpackage {
-        // ✅ Ne met pas imageOptions pour macOS → uniquement icon pour Mac
-        installerType = "dmg"
-        installerName = "HelloApp"
-        appVersion = "1.0.0"
-        vendor = "Florentin Fallon"
-        icon = "src/main/resources/icon.icns"
+        imageName = "MonApp"
+        installerName = "MonAppInstaller"
+        icon = "src/main/resources/images/money.icns"
     }
 }
