@@ -1,0 +1,43 @@
+name: Build and Package
+
+on: [push, pull_request]
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and package MacOS
+        run: ./gradlew jpackage
+
+      - name: Upload macOS package
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-package
+          path: build/jpackage/
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and package Windows
+        run: ./gradlew jpackage
+
+      - name: Upload Windows package
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-package
+          path: build/jpackage/
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and package Linux
+        run: ./gradlew jpackage
+
+      - name: Upload Linux package
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-package
+          path: build/jpackage/
