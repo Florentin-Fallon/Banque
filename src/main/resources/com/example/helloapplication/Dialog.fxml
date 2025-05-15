@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<?import javafx.scene.text.Text?>
+<ScrollPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.helloapplication.AddDialogController"
+            fitToWidth="true"
+            styleClass="dialog-scroll"
+            stylesheets="@css/style.css" hbarPolicy="NEVER">
+
+    <VBox styleClass="dialog" spacing="15">
+        <HBox alignment="CENTER">
+            <Label styleClass="Text" text="Enregistrer une dépense"/>
+        </HBox>
+
+        <Label text="Période :" />
+        <DatePicker fx:id="periodePicker" promptText="Ex: 2025-05-13" />
+
+        <Label text="Logement :" />
+        <TextField fx:id="logementField" promptText="Ex: 807" />
+
+        <Label text="Nourriture :" />
+        <TextField fx:id="nourritureField" promptText="Ex: 200" />
+
+        <Label text="Sorties :" />
+        <TextField fx:id="sortiesField" promptText="Ex: 50" />
+
+        <Label text="Voiture :" />
+        <TextField fx:id="voitureField" promptText="Ex: 296" />
+
+        <Label text="Voyage :" />
+        <TextField fx:id="voyageField" promptText="Ex: 500" />
+
+        <Label text="Impôts :" />
+        <TextField fx:id="impotsField" promptText="Ex: 80" />
+
+        <Label text="Autres :" />
+        <TextField fx:id="autresField" promptText="Ex: 1800" />
+
+        <HBox alignment="CENTER" spacing="10">
+            <Button text="Ajouter" onAction="#handleAjouter"/>
+            <Button text="Annuler" onAction="#handleAnnuler"/>
+        </HBox>
+    </VBox>
+</ScrollPane>
+

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<VBox spacing="20.0" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.helloapplication.Expense">
+    <TableView>
+        <columns>
+            <TableColumn editable="false" text="label">
+                <cellValueFactory>
+                    <PropertyValueFactory property="label"/>
+                </cellValueFactory>
+            </TableColumn>
+        </columns>
+    </TableView>
+    <TableView>
+        <columns>
+            <TableColumn editable="false" text="Valeur">
+                <cellValueFactory>
+                    <PropertyValueFactory property="value"/>
+                </cellValueFactory>
+            </TableColumn>
+        </columns>
+        <items>
+            <fx
+        </items>
+    </TableView>
+</VBox>
