@@ -6,6 +6,7 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class AddDialogController {
 
@@ -37,22 +38,31 @@ public class AddDialogController {
     @FXML
     private void handleAjouter(ActionEvent event) {
         try {
-            LocalDate periode = periodePicker.getValue(); // ⚠️ c’est une vraie date maintenant
+            LocalDate periode = periodePicker.getValue(); // c’est une vraie date
 
-            int logement = Integer.parseInt(logementField.getText());
-            int nourriture = Integer.parseInt(nourritureField.getText());
-            int sorties = Integer.parseInt(sortiesField.getText());
-            int voiture = Integer.parseInt(voitureField.getText());
-            int voyage = Integer.parseInt(voyageField.getText());
-            int impots = Integer.parseInt(impotsField.getText());
-            int autres = Integer.parseInt(autresField.getText());
+            double logement = Double.parseDouble(logementField.getText());
+            double nourriture = Double.parseDouble(nourritureField.getText());
+            double sorties = Double.parseDouble(sortiesField.getText());
+            double voiture = Double.parseDouble(voitureField.getText());
+            double voyage = Double.parseDouble(voyageField.getText());
+            double impots = Double.parseDouble(impotsField.getText());
+            double autres = Double.parseDouble(autresField.getText());
 
-            int total = logement + nourriture + sorties + voiture + voyage + impots + autres;
+            double total = logement + nourriture + sorties + voiture + voyage + impots + autres;
 
-            // ⚠️ Tu dois adapter ici selon ton code existant
-            HelloController newLine = new HelloController(periode, total, logement, nourriture, sorties, voiture, voyage, impots, autres);
+            ExpenseRecord newRecord = new ExpenseRecord(
+                    periode.format(DateTimeFormatter.ofPattern("yyyy-MM")),
+                    total,
+                    logement,
+                    nourriture,
+                    sorties,
+                    voiture,
+                    voyage,
+                    impots,
+                    autres
+            );
 
-            mainController.addLine(newLine);
+            mainController.addLine(newRecord);
 
             Stage stage = (Stage) periodePicker.getScene().getWindow();
             stage.close();
@@ -61,6 +71,12 @@ public class AddDialogController {
             alert.setTitle("Erreur");
             alert.setHeaderText("Entrée invalide");
             alert.setContentText("Veuillez vérifier les valeurs des champs numériques.");
+            alert.showAndWait();
+        } catch (NullPointerException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText("Date manquante");
+            alert.setContentText("Veuillez sélectionner une date valide.");
             alert.showAndWait();
         }
     }

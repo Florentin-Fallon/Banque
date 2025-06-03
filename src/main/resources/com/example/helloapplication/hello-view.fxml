@@ -1,69 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
-<?import javafx.collections.FXCollections?>
-<?import com.example.helloapplication.HelloController?>
-
+<?import com.example.helloapplication.components.CurrencySwitchButton?>
 
 <VBox alignment="CENTER" stylesheets="@css/style.css" styleClass="layout" spacing="20" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.example.helloapplication.HelloController">
+
+    <fx:include source="header.fxml"/>
+
     <HBox alignment="CENTER">
         <Label text="Tableau récapitulatif des dépenses"/>
     </HBox>
 
+    <!-- 🔁 Bouton de switch de devise -->
+    <HBox alignment="CENTER">
+        <CurrencySwitchButton fx:id="currencySwitchButton"/>
+    </HBox>
+
+    <HBox alignment="CENTER" spacing="10">
+        <Label text="Sélectionnez le mois :" />
+        <ChoiceBox fx:id="monthChoiceBox" />
+    </HBox>
+
     <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
         <columns>
-            <TableColumn editable="false" text="Période">
-                <cellValueFactory>
-                    <PropertyValueFactory property="periode"/>
-                </cellValueFactory>
-            </TableColumn>
-            <TableColumn editable="false" text="Total">
-                <cellValueFactory>
-                    <PropertyValueFactory property="total"/>
-                </cellValueFactory>
-            </TableColumn>
-            <TableColumn editable="false" text="Logement">
-                <cellValueFactory>
-                    <PropertyValueFactory property="logement"/>
-                </cellValueFactory>
-            </TableColumn>
-            <TableColumn editable="false" text="Nourriture">
-                <cellValueFactory>
-                    <PropertyValueFactory property="nourriture"/>
-                </cellValueFactory>
-            </TableColumn>
-            <TableColumn editable="false" text="Sorties">
-                <cellValueFactory>
-                    <PropertyValueFactory property="sorties"/>
-                </cellValueFactory>
-            </TableColumn>
-            <TableColumn editable="false" text="Voiture/Transport">
-                <cellValueFactory>
-                    <PropertyValueFactory property="voiture"/>
-                </cellValueFactory>
-            </TableColumn>
-            <TableColumn editable="false" text="Voyage">
-                <cellValueFactory>
-                    <PropertyValueFactory property="voyage"/>
-                </cellValueFactory>
-            </TableColumn>
-            <TableColumn editable="false" text="Impôts">
-                <cellValueFactory>
-                    <PropertyValueFactory property="impots"/>
-                </cellValueFactory>
-            </TableColumn>
-            <TableColumn editable="false" text="Autres">
-                <cellValueFactory>
-                    <PropertyValueFactory property="autres"/>
-                </cellValueFactory>
-            </TableColumn>
+            <TableColumn fx:id="periodeColumn" text="Période"/>
+            <TableColumn fx:id="totalColumn" text="Total (€)"/>
+            <TableColumn fx:id="logementColumn" text="Logement (€)"/>
+            <TableColumn fx:id="nourritureColumn" text="Nourriture (€)"/>
+            <TableColumn fx:id="sortiesColumn" text="Sorties (€)"/>
+            <TableColumn fx:id="voitureColumn" text="Voiture/Transport (€)"/>
+            <TableColumn fx:id="voyageColumn" text="Voyage (€)"/>
+            <TableColumn fx:id="impotsColumn" text="Impôts (€)"/>
+            <TableColumn fx:id="autresColumn" text="Autres (€)"/>
         </columns>
     </TableView>
+
     <HBox alignment="CENTER" spacing="10">
         <Button text="Ajouter" onAction="#openAddDialog"/>
     </HBox>

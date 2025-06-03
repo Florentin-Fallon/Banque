@@ -7,4 +7,6 @@ module com.example.helloapplication {
 
     opens com.example.helloapplication to javafx.fxml;
     exports com.example.helloapplication;
+    opens com.example.helloapplication.components to javafx.fxml;
+    exports com.example.helloapplication.components;
 }

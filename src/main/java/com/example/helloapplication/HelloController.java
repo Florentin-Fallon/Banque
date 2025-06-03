@@ -1,138 +1,199 @@
 package com.example.helloapplication;
 
+import com.example.helloapplication.components.CurrencySwitchButton;
+import javafx.animation.Animation;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.event.ActionEvent;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HelloController {
 
-    @FXML private TableView<HelloController> tableView; // Lien avec la TableView dans FXML
-    private final ObservableList<HelloController> data = FXCollections.observableArrayList();
+    @FXML private ChoiceBox<String> monthChoiceBox;
+    @FXML private TableView<ExpenseRecord> tableView;
 
-    // Attributs de chaque ligne
-    private LocalDate periode;  // Change ici de String à LocalDate
-    private int total;
-    private int logement;
-    private int nourriture;
-    private int sorties;
-    private int voiture;
-    private int voyage;
-    private int impots;
-    private int autres;
+    @FXML private TableColumn<ExpenseRecord, String> periodeColumn;
+    @FXML private TableColumn<ExpenseRecord, Double> totalColumn;
+    @FXML private TableColumn<ExpenseRecord, Double> logementColumn;
+    @FXML private TableColumn<ExpenseRecord, Double> nourritureColumn;
+    @FXML private TableColumn<ExpenseRecord, Double> sortiesColumn;
+    @FXML private TableColumn<ExpenseRecord, Double> voitureColumn;
+    @FXML private TableColumn<ExpenseRecord, Double> voyageColumn;
+    @FXML private TableColumn<ExpenseRecord, Double> impotsColumn;
+    @FXML private TableColumn<ExpenseRecord, Double> autresColumn;
 
-    // Constructeur
-    public HelloController() {}
+    @FXML public CurrencySwitchButton currencySwitchButton;
 
-    public HelloController(LocalDate periode, int total, int logement, int nourriture, int sorties, int voiture, int voyage, int impots, int autres) {
-        this.periode = periode;  // Utilise LocalDate ici
-        this.total = total;
-        this.logement = logement;
-        this.nourriture = nourriture;
-        this.sorties = sorties;
-        this.voiture = voiture;
-        this.voyage = voyage;
-        this.impots = impots;
-        this.autres = autres;
-    }
+    private final DateTimeFormatter dbMonthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
+    private final DateTimeFormatter displayMonthFormatter = DateTimeFormatter.ofPattern("MMM yyyy");
 
-    // Getter et Setters
-    public LocalDate getPeriode() { return periode; }  // Change ici aussi pour retourner LocalDate
-    public int getTotal() { return total; }
-    public int getLogement() { return logement; }
-    public int getNourriture() { return nourriture; }
-    public int getSorties() { return sorties; }
-    public int getVoiture() { return voiture; }
-    public int getVoyage() { return voyage; }
-    public int getImpots() { return impots; }
-    public int getAutres() { return autres; }
+    private double currentExchangeRate = 1.0;
+    private String currentCurrency = "EUR";
+    private Animation ExchangeRateFetcher;
 
-    // Méthode pour ajouter la nouvelle ligne à la liste observable
-    public void addLine(HelloController newLine) {
-        data.add(newLine);  // Ajouter la nouvelle ligne
-        tableView.setItems(data);  // Mettre à jour la TableView
+    @FXML
+    public void initialize() {
+        periodeColumn.setCellValueFactory(new PropertyValueFactory<>("periode"));
+        totalColumn.setCellValueFactory(new PropertyValueFactory<>("totalAffiche"));
+        logementColumn.setCellValueFactory(new PropertyValueFactory<>("logementAffiche"));
+        nourritureColumn.setCellValueFactory(new PropertyValueFactory<>("nourritureAffiche"));
+        sortiesColumn.setCellValueFactory(new PropertyValueFactory<>("sortiesAffiche"));
+        voitureColumn.setCellValueFactory(new PropertyValueFactory<>("voitureAffiche"));
+        voyageColumn.setCellValueFactory(new PropertyValueFactory<>("voyageAffiche"));
+        impotsColumn.setCellValueFactory(new PropertyValueFactory<>("impotsAffiche"));
+        autresColumn.setCellValueFactory(new PropertyValueFactory<>("autresAffiche"));
 
-        // Ajouter aussi cette ligne dans la base de données SQLite
-        boolean success = Database.insertExpense(newLine.getPeriode().toString(), newLine.getLogement(), newLine.getNourriture(),
-                newLine.getSorties(), newLine.getVoiture(), newLine.getVoyage(),
-                newLine.getImpots(), newLine.getAutres());
-        if (!success) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Erreur lors de l'ajout dans la base de données.");
-            alert.showAndWait();
-        }
-    }
+        initMonthChoiceBox();
 
-    // Méthode pour récupérer les données de la base de données et les ajouter à la TableView
-    public void loadDataFromDatabase() {
-        String query = "SELECT * FROM expense";
-        try (Connection connection = Database.connect();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet resultSet = statement.executeQuery()) {
-
-            while (resultSet.next()) {
-                // Extraire les données de chaque ligne de la base
-                String periodeString = resultSet.getString("date");
-
-                // Convertir la chaîne en LocalDate
-                LocalDate periode = LocalDate.parse(periodeString);
-
-                int logement = resultSet.getInt("housing");
-                int nourriture = resultSet.getInt("food");
-                int sorties = resultSet.getInt("goingOut");
-                int voiture = resultSet.getInt("transportation");
-                int voyage = resultSet.getInt("travel");
-                int impots = resultSet.getInt("tax");
-                int autres = resultSet.getInt("other");
-
-                // Calculer le total
-                int total = logement + nourriture + sorties + voiture + voyage + impots + autres;
-
-                // Créer une nouvelle ligne avec un LocalDate pour la période
-                HelloController line = new HelloController(periode, total, logement, nourriture, sorties, voiture, voyage, impots, autres);
-                data.add(line);  // Ajouter à l'ObservableList
+        monthChoiceBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                chargerDonneesPourMois(newVal);
             }
+        });
 
-            tableView.setItems(data);  // Mettre à jour la TableView avec les données récupérées
+        if (!monthChoiceBox.getItems().isEmpty()) {
+            monthChoiceBox.setValue(monthChoiceBox.getItems().get(0));
+        }
+
+        currencySwitchButton.setOnCurrencyChanged((nouvelleDevise, nouveauTaux) -> {
+            currentCurrency = nouvelleDevise;
+            currentExchangeRate = nouveauTaux;
+            mettreAJourTableauAvecTaux(nouveauTaux);
+        });
+    }
+
+    private void initMonthChoiceBox() {
+        List<String> last12Months = new ArrayList<>();
+        LocalDate now = LocalDate.now();
+
+        for (int i = 0; i < 12; i++) {
+            LocalDate month = now.minusMonths(i);
+            String formatted = month.format(dbMonthFormatter);
+            last12Months.add(formatted);
+        }
+
+        ObservableList<String> months = FXCollections.observableArrayList(last12Months);
+        monthChoiceBox.setItems(months);
+    }
+
+    private void chargerDonneesPourMois(String yearMonth) {
+        ObservableList<ExpenseRecord> data = FXCollections.observableArrayList();
+
+        String query = """
+                SELECT 
+                    strftime('%Y-%m', date) AS periode,
+                    SUM(housing + food + goingOut + transportation + travel + tax + other) AS total,
+                    SUM(housing) AS logement,
+                    SUM(food) AS nourriture,
+                    SUM(goingOut) AS sorties,
+                    SUM(transportation) AS voiture,
+                    SUM(travel) AS voyage,
+                    SUM(tax) AS impots,
+                    SUM(other) AS autres
+                FROM expense
+                WHERE strftime('%Y-%m', date) = ?
+                GROUP BY strftime('%Y-%m', date)
+                """;
+
+        try (Connection conn = Database.connect();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, yearMonth);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String periode = rs.getString("periode");
+                    double total = rs.getDouble("total");
+                    double logement = rs.getDouble("logement");
+                    double nourriture = rs.getDouble("nourriture");
+                    double sorties = rs.getDouble("sorties");
+                    double voiture = rs.getDouble("voiture");
+                    double voyage = rs.getDouble("voyage");
+                    double impots = rs.getDouble("impots");
+                    double autres = rs.getDouble("autres");
+
+                    ExpenseRecord record = new ExpenseRecord(
+                            periode, total, logement, nourriture, sorties,
+                            voiture, voyage, impots, autres
+                    );
+                    data.add(record);
+                }
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Erreur de récupération des données.");
-            alert.showAndWait();
         }
+
+        tableView.setItems(data);
+        mettreAJourTableauAvecTaux(currentExchangeRate);
     }
 
-    // Méthode pour ouvrir le dialogue d'ajout de ligne
+    private void mettreAJourTableauAvecTaux(double taux) {
+        for (ExpenseRecord record : tableView.getItems()) {
+            record.setTotalAffiche(record.getTotal() * taux);
+            record.setLogementAffiche(record.getLogement() * taux);
+            record.setNourritureAffiche(record.getNourriture() * taux);
+            record.setSortiesAffiche(record.getSorties() * taux);
+            record.setVoitureAffiche(record.getVoiture() * taux);
+            record.setVoyageAffiche(record.getVoyage() * taux);
+            record.setImpotsAffiche(record.getImpots() * taux);
+            record.setAutresAffiche(record.getAutres() * taux);
+        }
+
+        String suffixe = currentCurrency.equals("EUR") ? " (€)" : " (" + currentCurrency + ")";
+        totalColumn.setText("Total" + suffixe);
+        logementColumn.setText("Logement" + suffixe);
+        nourritureColumn.setText("Nourriture" + suffixe);
+        sortiesColumn.setText("Sorties" + suffixe);
+        voitureColumn.setText("Voiture/Transport" + suffixe);
+        voyageColumn.setText("Voyage" + suffixe);
+        impotsColumn.setText("Impôts" + suffixe);
+        autresColumn.setText("Autres" + suffixe);
+
+        tableView.refresh();
+    }
+
+    public void addLine(ExpenseRecord newRecord) {
+        tableView.getItems().add(newRecord);
+    }
+
     @FXML
-    private void openAddDialog() {
+    private void openAddDialog(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Dialog.fxml"));
             Parent root = loader.load();
 
-            AddDialogController addDialogController = loader.getController();
-            addDialogController.setMainController(this);
+            AddDialogController dialogController = loader.getController();
+            dialogController.setMainController(this);
 
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Ajouter une ligne");
-            dialogStage.initModality(Modality.APPLICATION_MODAL);
-            dialogStage.setScene(new Scene(root));
-            dialogStage.showAndWait();
+            Stage stage = new Stage();
+            stage.setTitle("Ajouter une dépense");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+            if (monthChoiceBox.getValue() != null) {
+                chargerDonneesPourMois(monthChoiceBox.getValue());
+            }
+
         } catch (IOException e) {
-            e.printStackTrace();  // Affiche l'erreur si le fichier FXML ne peut pas être chargé
+            e.printStackTrace();
         }
-    }
-
-    // Méthode pour initialiser les données lors du démarrage de l'application
-    @FXML
-    private void initialize() {
-        loadDataFromDatabase();  // Charger les données depuis la base de données
     }
 }

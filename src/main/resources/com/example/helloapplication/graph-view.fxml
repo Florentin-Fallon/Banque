@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.helloapplication.GraphController"
+      spacing="10" alignment="CENTER" prefWidth="600" prefHeight="400">
+    <fx:include source="header.fxml"/>
+    <ChoiceBox fx:id="monthChoiceBox" prefWidth="150" />
+
+    <PieChart fx:id="pieChart" prefHeight="200" prefWidth="400"/>
+
+    <LineChart fx:id="lineChart" prefHeight="200" prefWidth="400" animated="false">
+        <xAxis>
+            <CategoryAxis />
+        </xAxis>
+        <yAxis>
+            <NumberAxis />
+        </yAxis>
+    </LineChart>
+
+</VBox>
